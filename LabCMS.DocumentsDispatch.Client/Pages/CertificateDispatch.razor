@@ -1,0 +1,44 @@
+﻿@page "/"
+@page "/CertificateDispatch"
+
+<Space Direction="vertical" Size="middle">
+    <SpaceItem>
+        <InputFile multiple="true" OnChange="OnInputFileChange"></InputFile>
+    </SpaceItem>
+    <SpaceItem>
+        <AntList Bordered DataSource="UploadedFiles" Size="small">
+            <Header>
+                    <Icon Type="file-done" Theme="outline" Style="font-size:1rem"/>
+                        &nbsp;Uploaded Files
+            </Header>
+            <ChildContent Context="item">
+                <ListItem>
+                    @item
+                </ListItem>
+            </ChildContent>
+        </AntList>
+    </SpaceItem>
+    <SpaceItem>
+        <Button Type="primary">Send</Button>
+        <Button Type="primary" Danger OnClick="@(e=>UploadedFiles.Clear())">Clear</Button>
+    </SpaceItem>
+</Space>
+
+
+@code {
+
+    public List<string> UploadedFiles { get; } = new();
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        IReadOnlyList<IBrowserFile> files = e.GetMultipleFiles();
+        UploadedFiles.Clear();
+        foreach (IBrowserFile file in files)
+        {
+            using Stream stream = file.OpenReadStream(20 * 1024 * 1024);
+            byte[] buffer = new byte[stream.Length];
+            await stream.ReadAsync(buffer);
+            UploadedFiles.Add(file.Name);
+        }
+    }
+}
